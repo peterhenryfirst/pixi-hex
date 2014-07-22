@@ -1,0 +1,174 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>pixi.js example 1</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			background-color: #000000;
+		}
+	</style>
+	<script src="javascripts/pixi/pixi.dev.js"></script>
+</head>
+<body>
+	<script>
+		// create an new instance of a pixi stage
+		var WIDTH = 700;
+		var HEIGHT = 300;
+		var stage = new PIXI.Stage(0x66FF99);
+
+		// create a renderer instance.
+		//var renderer = PIXI.autoDetectRenderer(WIDTH, HEIGHT);
+		//var renderer = new PIXI.autoDetectRenderer(1024, 768, null, true, true);
+		var renderer = new PIXI.WebGLRenderer(WIDTH, HEIGHT);
+
+		// add the renderer view element to the DOM
+		document.body.appendChild(renderer.view);
+
+		//requestAnimFrame( animate );
+
+
+		var loader = new PIXI.AssetLoader(['spritesheet/hex-tiles.json']);
+
+		// map
+		var G=0, D=1, W=2;
+		/*
+		var terrain = [
+			[G, G, G, G, W],
+			[D, D, G, G, W],
+			[D, G, G, W, W],
+			[D, G, W, W, W],
+		];
+		*/
+
+		var terrain = [];
+
+		for (var i = 0, iL = 500; i < iL; i++) {
+			terrain.push([G,W,D,W,G,D,W,D,W,D,G,D,W,G,D,W,D,G,W,D]);
+		}
+
+
+		// Tiles with height can exceed these dimensions.
+		var tileHeight = 89;
+		var tileWidth = 65;
+
+		// tiles
+		var grass = isoTile('tileGrass.png');
+		var dirt = isoTile('tileDirt.png');
+		var water = isoTile('tileWater.png');
+		var sand = isoTile('tileSand.png');
+		var tileMethods = [grass, dirt, water, sand];
+
+		function isoTile(filename) {
+			return function(x, y, q, r) {
+				var tile = PIXI.Sprite.fromFrame(filename);
+				tile.position.x = x;
+				tile.position.y = y;
+
+				// middle-center
+				tile.anchor.x = 0.5;
+				tile.anchor.y = 0.5;
+				stage.addChild(tile);
+
+				var textCoord = new PIXI.Text("(" + q + "," + r + ")", { font: "10px", fill: "Black", align: "center" });
+				textCoord.anchor.x = textCoord.anchor.y = 0.5;
+				textCoord.position.x = x;
+				textCoord.position.y = y;
+				stage.addChild(textCoord);
+			}
+		}
+
+		function drawMap(terrain, xOffset, yOffset) {
+			var tileType, x, y, isoX, isoY, idx;
+
+			for (var i = 0, iL = terrain.length; i < iL; i++) {
+				for (var j = 0, jL = terrain[i].length; j < jL; j++) {
+					// cartesian 2D coordinate
+					x = j * tileWidth;
+					y = i * tileHeight;
+
+					// iso coordinate
+					/*
+					isoX = x - y;
+					isoY = (x + y) / 2;
+					/**/
+
+					tileType = terrain[i][j];
+					drawTile = tileMethods[tileType];
+					//drawTile(isoX + xOffset, isoY + yOffset);
+					drawTile(x + xOffset, y + yOffset, j, i);
+				}
+			}
+		}
+
+		loader.onComplete = start;
+		loader.load();
+
+		function start() {
+			//drawMap(terrain, WIDTH / 2, tileHeight * 1.5);
+			//drawMap(terrain, 0, 0);
+			drawMap(terrain, tileWidth * 0.5, tileHeight * 0.5);
+
+			var tile = PIXI.Sprite.fromFrame("tileAutumn.png");
+			tile.position.x = 500;
+			tile.position.y = 200;
+
+			// middle-center
+			tile.anchor.x = 0.5;
+			tile.anchor.y = 0.5;
+			stage.addChild(tile);
+
+			function animate() {
+				requestAnimFrame(animate);
+
+				//tile.position.x += 0.1;
+
+				renderer.render(stage);
+			}
+			requestAnimFrame(animate);
+		}
+
+		/*
+		var imgUrl = 'http://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Ski_trail_rating_symbol-blue_square.svg/600px-Ski_trail_rating_symbol-blue_square.svg.png';
+
+		var sprite = PIXI.Sprite.fromImage(imgUrl);
+		sprite.position.set(0, 0);
+		sprite.pivot.set(sprite.width/2, sprite.height/2);
+
+		stage.addChild(sprite);
+		*/
+		
+		/*
+		// create a texture from an image path
+		var texture = PIXI.Texture.fromImage("images/bunny.png");
+		// create a new Sprite using the texture
+		var bunny = new PIXI.Sprite(texture);
+
+		// center the sprites anchor point
+		bunny.anchor.x = 0.5;
+		bunny.anchor.y = 0.5;
+
+		// move the sprite t the center of the screen
+		bunny.position.x = 200;
+		bunny.position.y = 150;
+
+		stage.addChild(bunny);
+		/**/
+
+		function animate() {
+
+		    requestAnimFrame( animate );
+
+			// just for fun, lets rotate mr rabbit a little
+			//bunny.rotation += 0.1;
+
+			//sprite.rotation += 0.1;
+
+		    // render the stage   
+		    renderer.render(stage);
+		}
+
+	</script>
+</body>
+</html>
