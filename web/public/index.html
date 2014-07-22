@@ -44,7 +44,7 @@
 
 		var terrain = [];
 
-		for (var i = 0, iL = 500; i < iL; i++) {
+		for (var i = 0, iL = 4; i < iL; i++) {
 			terrain.push([G,W,D,W,G,D,W,D,W,D,G,D,W,G,D,W,D,G,W,D]);
 		}
 
@@ -52,6 +52,9 @@
 		// Tiles with height can exceed these dimensions.
 		var tileHeight = 89;
 		var tileWidth = 65;
+		
+		var size = 36;
+		var sqrt3 = Math.sqrt(3);
 
 		// tiles
 		var grass = isoTile('tileGrass.png');
@@ -59,12 +62,22 @@
 		var water = isoTile('tileWater.png');
 		var sand = isoTile('tileSand.png');
 		var tileMethods = [grass, dirt, water, sand];
+		
+		function convertAxialToCube(q, r) {
+			var x = size * sqrt3 * (q + r / 2);
+			var y = size  * 3 / 2 * r;
+			
+			return {x:x,y:y};
+		}
 
 		function isoTile(filename) {
-			return function(x, y, q, r) {
+			return function(q, r) {
 				var tile = PIXI.Sprite.fromFrame(filename);
-				tile.position.x = x;
-				tile.position.y = y;
+				
+				var cubePosition = convertAxialToCube(q,r);
+				
+				tile.position.x = cubePosition.x;
+				tile.position.y = cubePosition.y;
 
 				// middle-center
 				tile.anchor.x = 0.5;
@@ -73,8 +86,8 @@
 
 				var textCoord = new PIXI.Text("(" + q + "," + r + ")", { font: "10px", fill: "Black", align: "center" });
 				textCoord.anchor.x = textCoord.anchor.y = 0.5;
-				textCoord.position.x = x;
-				textCoord.position.y = y;
+				textCoord.position.x = cubePosition.x;
+				textCoord.position.y = cubePosition.y;
 				stage.addChild(textCoord);
 			}
 		}
@@ -97,7 +110,8 @@
 					tileType = terrain[i][j];
 					drawTile = tileMethods[tileType];
 					//drawTile(isoX + xOffset, isoY + yOffset);
-					drawTile(x + xOffset, y + yOffset, j, i);
+					//drawTile(x + xOffset, y + yOffset, j, i);
+					drawTile(j, i);
 				}
 			}
 		}
