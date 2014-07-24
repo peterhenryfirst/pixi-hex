@@ -44,8 +44,8 @@
 
 		var terrain = [];
 
-		for (var i = 0, iL = 4; i < iL; i++) {
-			terrain.push([G,W,D,W,G,D,W,D,W,D,G,D,W,G,D,W,D,G,W,D]);
+		for (var i = 0, iL = 5; i < iL; i++) {
+			terrain.push([G,W,D,W,G,D,W,D,W]);
 		}
 
 
@@ -53,7 +53,7 @@
 		var tileHeight = 89;
 		var tileWidth = 65;
 		
-		var size = 36;
+		var size = 65;
 		var sqrt3 = Math.sqrt(3);
 
 		// tiles
@@ -63,18 +63,73 @@
 		var sand = isoTile('tileSand.png');
 		var tileMethods = [grass, dirt, water, sand];
 		
-		function convertAxialToCube(q, r) {
+		function convertAxialToPixel(q, r) {
+			var x = size * (q + r * 0.5);
+			var y = r * size * 3/ 4;
+			/*
 			var x = size * sqrt3 * (q + r / 2);
 			var y = size  * 3 / 2 * r;
-			
+			/**/
 			return {x:x,y:y};
 		}
+		
+		function convertPixelToAxial(x, y) {
+			//first approximation
+			
+			var q = (x - 2/3 * y) / size;
+			//var r = (4 * y) / 3 * size;
+			var r = (4/3 * y) / size;
+			
+			console.log("(Q,R) = (" + q + "," + r + ")");
+			
+			//convert to cube coordinates
+			var x = q;
+			var z = r;
+			var y = - x - z;
+			
+			var rx = Math.round(x);
+			var rz = Math.round(z);
+			var ry = Math.round(y);
+			
+			var xDiff = Math.abs(rx - x)
+			var yDiff = Math.abs(ry - y)
+			var zDiff = Math.abs(rz - z)
+			
+			if (xDiff > yDiff && xDiff > zDiff) {
+				rx = - ry - rz;
+			} else if (yDiff > zDiff) {
+				ry = - rx - rz;
+			} else{
+				rz = -rx-ry;
+			}
+			
+			console.log("(Q,R) = (" + rx + "," + rz + ")")
+			//return cube coordinates
+			//return {x: rx, y: ry, z: rz};
+			
+		}
+		
+		function getMousePos(evt) {
+			//*
+			var rect = renderer.view.getBoundingClientRect();
+			return {x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+			/**/
+			/*
+			console.log({x: evt.clientX, y: evt.clientY });
+			return {x: evt.clientX, y: evt.clientY };
+			/**/
+		}
+		
+		renderer.view.addEventListener("click", function(event) {
+			var mousePos = getMousePos(event);
+			convertPixelToAxial(mousePos.x, mousePos.y);
+		});
 
 		function isoTile(filename) {
 			return function(q, r) {
 				var tile = PIXI.Sprite.fromFrame(filename);
 				
-				var cubePosition = convertAxialToCube(q,r);
+				var cubePosition = convertAxialToPixel(q,r);
 				
 				tile.position.x = cubePosition.x;
 				tile.position.y = cubePosition.y;
