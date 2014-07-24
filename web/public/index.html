@@ -73,15 +73,45 @@
 			return {x:x,y:y};
 		}
 		
+		function euclideanDistance(p0, p1) {
+
+			return Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2));
+		}
+
 		function convertPixelToAxial(x, y) {
 			//first approximation
 			
-			var q = (x - 2/3 * y) / size;
+			var q = Math.round((x - 2/3 * y) / size);
 			//var r = (4 * y) / 3 * size;
-			var r = (4/3 * y) / size;
+			var r = Math.round((4/3 * y) / size);
 			
+			var mousePoint = {x: x, y: y};
+
 			console.log("(Q,R) = (" + q + "," + r + ")");
 			
+			var distance = euclideanDistance(convertAxialToPixel(q, r), mousePoint);
+
+			console.log("DISTANCE: " + distance);
+
+			var newQ = q, newR = r;
+
+			for (var i = 0; i < neighbors.length; i++) {
+				var qi = q + neighbors[i][0];
+				var ri = r + neighbors[i][1];
+
+				console.log("neighbors (Q,R) = (" + qi + "," + ri + ")");
+
+				var newDistance = euclideanDistance(convertAxialToPixel(qi, ri), mousePoint);
+				console.log("NEW DISTANCE: " + newDistance);
+				if (distance > newDistance) {
+					newQ = qi;
+					newR = ri;
+				}
+			}
+
+			console.log("NEW (Q,R) = (" + q + "," + r + ")");
+
+			/*
 			//convert to cube coordinates
 			var x = q;
 			var z = r;
@@ -106,9 +136,14 @@
 			console.log("(Q,R) = (" + rx + "," + rz + ")")
 			//return cube coordinates
 			//return {x: rx, y: ry, z: rz};
-			
+			/**/
 		}
 		
+		var neighbors = [
+			[1, 0], [1, -1], [0, -1],
+			[-1, 0], [-1, 1], [0, 1]
+		];
+
 		function getMousePos(evt) {
 			//*
 			var rect = renderer.view.getBoundingClientRect();
