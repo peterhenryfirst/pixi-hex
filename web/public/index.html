@@ -53,6 +53,8 @@
 		var tileHeight = 89;
 		var tileWidth = 65;
 		
+		//division 65/80 = 0.8125, for the future this division is useful and use that number for the tile anchor exact value
+
 		var size = 65;
 		var sqrt3 = Math.sqrt(3);
 
@@ -80,7 +82,7 @@
 
 		function convertPixelToAxial(x, y) {
 			//first approximation
-			
+			/*
 			var q = Math.round((x - 2/3 * y) / size);
 			//var r = (4 * y) / 3 * size;
 			var r = Math.round((4/3 * y) / size);
@@ -110,8 +112,14 @@
 			}
 
 			console.log("NEW (Q,R) = (" + q + "," + r + ")");
+			/**/
 
-			/*
+			//*
+
+			var q = (x - 2/3 * y) / size;
+			//var r = (4 * y) / 3 * size;
+			var r = (4/3 * y) / size;
+
 			//convert to cube coordinates
 			var x = q;
 			var z = r;
@@ -171,7 +179,7 @@
 
 				// middle-center
 				tile.anchor.x = 0.5;
-				tile.anchor.y = 0.5;
+				tile.anchor.y = 0.3652;
 				stage.addChild(tile);
 
 				var textCoord = new PIXI.Text("(" + q + "," + r + ")", { font: "10px", fill: "Black", align: "center" });
@@ -179,6 +187,17 @@
 				textCoord.position.x = cubePosition.x;
 				textCoord.position.y = cubePosition.y;
 				stage.addChild(textCoord);
+
+				var textCoord2 = new PIXI.Text("(" + cubePosition.x + "," + cubePosition.y + ")", { font: "10px", fill: "Black", align: "center" });
+				textCoord2.anchor.x = textCoord2.anchor.y = 0.5;
+				textCoord2.position.x = cubePosition.x;
+				textCoord2.position.y = cubePosition.y + 10.0;
+				stage.addChild(textCoord2);
+
+				var g = new PIXI.Graphics();
+				g.beginFill(0xFFCC00, 1);
+				g.drawCircle(cubePosition.x, cubePosition.y, 1);
+				stage.addChild(g);
 			}
 		}
 
