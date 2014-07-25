@@ -57,6 +57,10 @@
 
 		var size = 65;
 		var sqrt3 = Math.sqrt(3);
+		var anchor = {
+			x: 0.5,
+			y: (size * 0.5) * 0.5 / (tileHeight * 0.5)
+		};
 
 		// tiles
 		var grass = isoTile('tileGrass.png');
@@ -178,8 +182,12 @@
 				tile.position.y = cubePosition.y;
 
 				// middle-center
+				/*
 				tile.anchor.x = 0.5;
 				tile.anchor.y = 0.3652;
+				/**/
+				tile.anchor.x = anchor.x;
+				tile.anchor.y = anchor.y;
 				stage.addChild(tile);
 
 				var textCoord = new PIXI.Text("(" + q + "," + r + ")", { font: "10px", fill: "Black", align: "center" });
