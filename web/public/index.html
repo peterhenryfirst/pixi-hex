@@ -67,8 +67,11 @@
 		var dirt = isoTile('tileDirt.png');
 		var water = isoTile('tileWater.png');
 		var sand = isoTile('tileSand.png');
+		
 		var tileMethods = [grass, dirt, water, sand];
 		
+		var clickTile, clickPos;
+
 		function convertAxialToPixel(q, r) {
 			var x = size * (q + r * 0.5);
 			var y = r * size * 3/ 4;
@@ -148,7 +151,9 @@
 			console.log("(Q,R) = (" + rx + "," + rz + ")")
 			//return cube coordinates
 			//return {x: rx, y: ry, z: rz};
-			/**/
+			
+			return {q: rx, r: rz};
+
 		}
 		
 		var neighbors = [
@@ -169,7 +174,12 @@
 		
 		renderer.view.addEventListener("click", function(event) {
 			var mousePos = getMousePos(event);
-			convertPixelToAxial(mousePos.x, mousePos.y);
+			var axialPos = convertPixelToAxial(mousePos.x, mousePos.y);
+
+			clickPos = convertAxialToPixel(axialPos.q, axialPos.r);
+			clickTile.position.x = clickPos.x;
+			clickTile.position.y = clickPos.y;
+			//clickTile.(axialPos.q, axialPos.r);
 		});
 
 		function isoTile(filename) {
@@ -210,7 +220,7 @@
 		}
 
 		function drawMap(terrain, xOffset, yOffset) {
-			var tileType, x, y, isoX, isoY, idx;
+			var tileType, x, y, isoX, isoY, idx, drawTile;
 
 			for (var i = 0, iL = terrain.length; i < iL; i++) {
 				for (var j = 0, jL = terrain[i].length; j < jL; j++) {
@@ -241,63 +251,23 @@
 			//drawMap(terrain, 0, 0);
 			drawMap(terrain, tileWidth * 0.5, tileHeight * 0.5);
 
-			var tile = PIXI.Sprite.fromFrame("tileAutumn.png");
-			tile.position.x = 500;
-			tile.position.y = 200;
+
+			clickTile = PIXI.Sprite.fromFrame("tileSnow_tile.png");
+			clickPos = convertAxialToPixel(0, 0);
+			clickTile.position.x = clickPos.x;
+			clickTile.position.y = clickPos.y;
 
 			// middle-center
-			tile.anchor.x = 0.5;
-			tile.anchor.y = 0.5;
-			stage.addChild(tile);
+			clickTile.anchor.x = anchor.x;
+			clickTile.anchor.y = anchor.y;
+			stage.addChild(clickTile);
 
 			function animate() {
 				requestAnimFrame(animate);
 
-				//tile.position.x += 0.1;
-
 				renderer.render(stage);
 			}
 			requestAnimFrame(animate);
-		}
-
-		/*
-		var imgUrl = 'http://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Ski_trail_rating_symbol-blue_square.svg/600px-Ski_trail_rating_symbol-blue_square.svg.png';
-
-		var sprite = PIXI.Sprite.fromImage(imgUrl);
-		sprite.position.set(0, 0);
-		sprite.pivot.set(sprite.width/2, sprite.height/2);
-
-		stage.addChild(sprite);
-		*/
-		
-		/*
-		// create a texture from an image path
-		var texture = PIXI.Texture.fromImage("images/bunny.png");
-		// create a new Sprite using the texture
-		var bunny = new PIXI.Sprite(texture);
-
-		// center the sprites anchor point
-		bunny.anchor.x = 0.5;
-		bunny.anchor.y = 0.5;
-
-		// move the sprite t the center of the screen
-		bunny.position.x = 200;
-		bunny.position.y = 150;
-
-		stage.addChild(bunny);
-		/**/
-
-		function animate() {
-
-		    requestAnimFrame( animate );
-
-			// just for fun, lets rotate mr rabbit a little
-			//bunny.rotation += 0.1;
-
-			//sprite.rotation += 0.1;
-
-		    // render the stage   
-		    renderer.render(stage);
 		}
 
 	</script>
