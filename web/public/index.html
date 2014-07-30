@@ -12,11 +12,15 @@
 	<script src="javascripts/pixi/pixi.dev.js"></script>
 </head>
 <body>
+	<button id="offsetXNegative">-5</button>
+	<button id="offsetXPositive">+5</button>
+	<br />
 	<script>
-		// create an new instance of a pixi stage
+		// create a new instance of a pixi stage
 		var WIDTH = 700;
 		var HEIGHT = 300;
 		var stage = new PIXI.Stage(0x66FF99);
+		var hexContainer = new PIXI.DisplayObjectContainer();
 
 		// create a renderer instance.
 		//var renderer = PIXI.autoDetectRenderer(WIDTH, HEIGHT);
@@ -62,6 +66,9 @@
 			y: (size * 0.5) * 0.5 / (tileHeight * 0.5)
 		};
 
+		var mouseOffset = {x: 0, y: 0};
+		var totalOffset = {x: 0, y: 0};
+
 		// tiles
 		var grass = isoTile('tileGrass.png');
 		var dirt = isoTile('tileDirt.png');
@@ -72,14 +79,30 @@
 		
 		var clickTile, clickPos;
 
+		document.getElementById("offsetXNegative").addEventListener("click", function(event) {
+			mouseOffset.x = -5;
+			totalOffset.x -= 5;
+			updateWorld();
+		});
+		document.getElementById("offsetXPositive").addEventListener("click", function(event) {
+			mouseOffset.x = 5;
+			totalOffset.x += 5;
+			updateWorld();
+		});
+
+		function updateWorld() {
+			hexContainer.position.x += mouseOffset.x;
+			hexContainer.position.y += mouseOffset.y;
+		}
+
 		function convertAxialToPixel(q, r) {
-			var x = size * (q + r * 0.5);
-			var y = r * size * 3/ 4;
+			var x = (size * (q + r * 0.5));
+			var y = (r * size * 3/ 4);
 			/*
 			var x = size * sqrt3 * (q + r / 2);
 			var y = size  * 3 / 2 * r;
 			/**/
-			return {x:x,y:y};
+			return { x: x + totalOffset.x, y: y + totalOffset.y };
 		}
 		
 		function euclideanDistance(p0, p1) {
@@ -88,44 +111,13 @@
 		}
 
 		function convertPixelToAxial(x, y) {
-			//first approximation
-			/*
-			var q = Math.round((x - 2/3 * y) / size);
+
+			var newX = x + totalOffset.x;
+			var newY = y + totalOffset.y;
+
+			var q = (newX - 2/3 * newY) / size;
 			//var r = (4 * y) / 3 * size;
-			var r = Math.round((4/3 * y) / size);
-			
-			var mousePoint = {x: x, y: y};
-
-			console.log("(Q,R) = (" + q + "," + r + ")");
-			
-			var distance = euclideanDistance(convertAxialToPixel(q, r), mousePoint);
-
-			console.log("DISTANCE: " + distance);
-
-			var newQ = q, newR = r;
-
-			for (var i = 0; i < neighbors.length; i++) {
-				var qi = q + neighbors[i][0];
-				var ri = r + neighbors[i][1];
-
-				console.log("neighbors (Q,R) = (" + qi + "," + ri + ")");
-
-				var newDistance = euclideanDistance(convertAxialToPixel(qi, ri), mousePoint);
-				console.log("NEW DISTANCE: " + newDistance);
-				if (distance > newDistance) {
-					newQ = qi;
-					newR = ri;
-				}
-			}
-
-			console.log("NEW (Q,R) = (" + q + "," + r + ")");
-			/**/
-
-			//*
-
-			var q = (x - 2/3 * y) / size;
-			//var r = (4 * y) / 3 * size;
-			var r = (4/3 * y) / size;
+			var r = (4/3 * newY) / size;
 
 			//convert to cube coordinates
 			var x = q;
@@ -149,8 +141,6 @@
 			}
 			
 			console.log("(Q,R) = (" + rx + "," + rz + ")")
-			//return cube coordinates
-			//return {x: rx, y: ry, z: rz};
 			
 			return {q: rx, r: rz};
 
@@ -162,14 +152,8 @@
 		];
 
 		function getMousePos(evt) {
-			//*
 			var rect = renderer.view.getBoundingClientRect();
 			return {x: evt.clientX - rect.left, y: evt.clientY - rect.top };
-			/**/
-			/*
-			console.log({x: evt.clientX, y: evt.clientY });
-			return {x: evt.clientX, y: evt.clientY };
-			/**/
 		}
 		
 		renderer.view.addEventListener("click", function(event) {
@@ -179,7 +163,6 @@
 			clickPos = convertAxialToPixel(axialPos.q, axialPos.r);
 			clickTile.position.x = clickPos.x;
 			clickTile.position.y = clickPos.y;
-			//clickTile.(axialPos.q, axialPos.r);
 		});
 
 		function isoTile(filename) {
@@ -192,30 +175,30 @@
 				tile.position.y = cubePosition.y;
 
 				// middle-center
-				/*
-				tile.anchor.x = 0.5;
-				tile.anchor.y = 0.3652;
-				/**/
 				tile.anchor.x = anchor.x;
 				tile.anchor.y = anchor.y;
-				stage.addChild(tile);
+				//stage.addChild(tile);
+				hexContainer.addChild(tile);
 
 				var textCoord = new PIXI.Text("(" + q + "," + r + ")", { font: "10px", fill: "Black", align: "center" });
 				textCoord.anchor.x = textCoord.anchor.y = 0.5;
 				textCoord.position.x = cubePosition.x;
 				textCoord.position.y = cubePosition.y;
-				stage.addChild(textCoord);
+				//stage.addChild(textCoord);
+				hexContainer.addChild(textCoord);
 
 				var textCoord2 = new PIXI.Text("(" + cubePosition.x + "," + cubePosition.y + ")", { font: "10px", fill: "Black", align: "center" });
 				textCoord2.anchor.x = textCoord2.anchor.y = 0.5;
 				textCoord2.position.x = cubePosition.x;
 				textCoord2.position.y = cubePosition.y + 10.0;
-				stage.addChild(textCoord2);
+				//stage.addChild(textCoord2);
+				hexContainer.addChild(textCoord2);
 
 				var g = new PIXI.Graphics();
 				g.beginFill(0xFFCC00, 1);
 				g.drawCircle(cubePosition.x, cubePosition.y, 1);
-				stage.addChild(g);
+				//stage.addChild(g);
+				hexContainer.addChild(g);
 			}
 		}
 
@@ -247,8 +230,6 @@
 		loader.load();
 
 		function start() {
-			//drawMap(terrain, WIDTH / 2, tileHeight * 1.5);
-			//drawMap(terrain, 0, 0);
 			drawMap(terrain, tileWidth * 0.5, tileHeight * 0.5);
 
 
@@ -260,7 +241,10 @@
 			// middle-center
 			clickTile.anchor.x = anchor.x;
 			clickTile.anchor.y = anchor.y;
-			stage.addChild(clickTile);
+			//stage.addChild(clickTile);
+			hexContainer.addChild(clickTile);
+
+			stage.addChild(hexContainer);
 
 			function animate() {
 				requestAnimFrame(animate);
