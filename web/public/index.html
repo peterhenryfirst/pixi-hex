@@ -12,8 +12,11 @@
 	<script src="javascripts/pixi/pixi.dev.js"></script>
 </head>
 <body>
-	<button id="offsetXNegative">-5</button>
-	<button id="offsetXPositive">+5</button>
+	<button id="offsetXNegative">&larr;</button>
+	<button id="offsetXPositive">&rarr;</button>
+	<br />
+	<button id="offsetYNegative">&uarr;</button>
+	<button id="offsetYPositive">&darr;</button>
 	<br />
 	<script>
 		// create a new instance of a pixi stage
@@ -81,12 +84,37 @@
 
 		document.getElementById("offsetXNegative").addEventListener("click", function(event) {
 			mouseOffset.x = -5;
+			mouseOffset.y = 0;
+			
 			totalOffset.x -= 5;
+			
 			updateWorld();
 		});
+
 		document.getElementById("offsetXPositive").addEventListener("click", function(event) {
 			mouseOffset.x = 5;
+			mouseOffset.y = 0;
+			
 			totalOffset.x += 5;
+			
+			updateWorld();
+		});
+
+		document.getElementById("offsetYNegative").addEventListener("click", function(event) {
+			mouseOffset.x = 0;
+			mouseOffset.y = -5;
+
+			totalOffset.y -= 5;
+			
+			updateWorld();
+		});
+		
+		document.getElementById("offsetYPositive").addEventListener("click", function(event) {
+			mouseOffset.x = 0;
+			mouseOffset.y = 5;
+
+			totalOffset.y += 5;
+			
 			updateWorld();
 		});
 
@@ -102,7 +130,16 @@
 			var x = size * sqrt3 * (q + r / 2);
 			var y = size  * 3 / 2 * r;
 			/**/
-			return { x: x + totalOffset.x, y: y + totalOffset.y };
+
+			/*
+			var newX = x + totalOffset.x;
+
+			var newY = y + totalOffset.y;
+
+			return { x: newX, y: newY };
+			/**/
+			return { x: x, y: y };
+			
 		}
 		
 		function euclideanDistance(p0, p1) {
@@ -112,12 +149,12 @@
 
 		function convertPixelToAxial(x, y) {
 
-			var newX = x + totalOffset.x;
-			var newY = y + totalOffset.y;
+			//var newX = x + totalOffset.x;
+			//var newY = y + totalOffset.y;
 
-			var q = (newX - 2/3 * newY) / size;
+			var q = (x - 2/3 * y) / size;
 			//var r = (4 * y) / 3 * size;
-			var r = (4/3 * newY) / size;
+			var r = (4/3 * y) / size;
 
 			//convert to cube coordinates
 			var x = q;
@@ -158,9 +195,20 @@
 		
 		renderer.view.addEventListener("click", function(event) {
 			var mousePos = getMousePos(event);
+
+			//translate to origin
+			mousePos.x -= totalOffset.x;
+			mousePos.y -= totalOffset.y;
+
 			var axialPos = convertPixelToAxial(mousePos.x, mousePos.y);
 
 			clickPos = convertAxialToPixel(axialPos.q, axialPos.r);
+
+			//move to the new representation
+			//but it is not neccesary because the pixel representation is the x,y representation in canvas x,y (I need to test with maps with more hexagons)
+			//clickPos.x += totalOffset.x;
+			//clickPos.y += totalOffset.y;
+
 			clickTile.position.x = clickPos.x;
 			clickTile.position.y = clickPos.y;
 		});
@@ -171,6 +219,8 @@
 				
 				var cubePosition = convertAxialToPixel(q,r);
 				
+				//we need to move to the other position if the (0,0) is not equivalent to the pixel (0,0)
+
 				tile.position.x = cubePosition.x;
 				tile.position.y = cubePosition.y;
 
