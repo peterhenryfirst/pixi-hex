@@ -192,8 +192,51 @@
 			var rect = renderer.view.getBoundingClientRect();
 			return {x: evt.clientX - rect.left, y: evt.clientY - rect.top };
 		}
-		
-		renderer.view.addEventListener("click", function(event) {
+
+		// Timeout, started on mousedown, triggers the beginning of a hold
+		var holdStarter = null;
+
+		// Milliseconds to wait before recognizing a hold
+		var holdDelay = 200;
+		// Indicates the user is currently holding the mouse down
+		var holdActive = false;
+
+		var drag = null;
+
+		function onMouseDown(event) {
+			console.log("mousedown");
+			// Do not take any immediate action - just set the holdStarter
+			//  to wait for the predetermined delay, and then begin a hold
+			holdStarter = setTimeout(function() {
+				holdStarter = null;
+				holdActive = true;
+				// begin hold-only operation here, if desired
+			}, holdDelay);
+
+			drag = getMousePos(event);
+		}
+
+		function onMouseUp(event) {
+			console.log("mouseup");
+			drag = null;
+			// If the mouse is released immediately (i.e., a click), before the
+			//  holdStarter runs, then cancel the holdStarter and do the click
+			if (holdStarter) {
+				clearTimeout(holdStarter);
+				// run click-only operation here
+				onMouseClick(event);
+			} else if (holdActive) {
+				// Otherwise, if the mouse was being held, end the hold
+				holdActive = false;
+				// end hold-only operation here, if desired
+			}
+		}
+
+		function onMouseOut(event) {
+			onMouseUp(event);
+		}
+
+		function onMouseClick(event) {
 			var mousePos = getMousePos(event);
 
 			//translate to origin
@@ -211,7 +254,35 @@
 
 			clickTile.position.x = clickPos.x;
 			clickTile.position.y = clickPos.y;
+		}
+
+		function onMouseMove(event) {
+			if (drag) {
+				var mousePos = getMousePos(event);
+
+				var dx = mousePos.x - drag.x;
+				var dy = mousePos.y - drag.y;
+
+				var pos = hexContainer.position;
+
+				hexContainer.position.x = pos.x - dx;
+				hexContainer.position.y = pos.y - dy;
+			}
+		}
+
+		renderer.view.addEventListener("mousedown", onMouseDown);
+
+		renderer.view.addEventListener("mouseup", onMouseUp);
+
+		renderer.view.addEventListener("mouseout", onMouseOut);
+
+		renderer.view.addEventListener("mousemove", onMouseMove);
+		
+		/*
+		renderer.view.addEventListener("click", function(event) {
+			
 		});
+		/**/
 
 		function isoTile(filename) {
 			return function(q, r) {
