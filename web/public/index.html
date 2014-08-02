@@ -218,7 +218,7 @@
 
 		function onMouseUp(event) {
 			console.log("mouseup");
-			drag = null;
+			
 			// If the mouse is released immediately (i.e., a click), before the
 			//  holdStarter runs, then cancel the holdStarter and do the click
 			if (holdStarter) {
@@ -229,7 +229,19 @@
 				// Otherwise, if the mouse was being held, end the hold
 				holdActive = false;
 				// end hold-only operation here, if desired
+				/*
+				if (drag) {
+					var mousePos = getMousePos(event);
+					
+					var dx = mousePos.x - drag.x;
+					var dy = mousePos.y - drag.y;
+					
+					totalOffset.x += dx;
+					totalOffset.y += dy;
+				}
+				/**/
 			}
+			drag = null;
 		}
 
 		function onMouseOut(event) {
@@ -255,7 +267,7 @@
 			clickTile.position.x = clickPos.x;
 			clickTile.position.y = clickPos.y;
 		}
-
+		
 		function onMouseMove(event) {
 			if (drag) {
 				var mousePos = getMousePos(event);
@@ -263,10 +275,18 @@
 				var dx = mousePos.x - drag.x;
 				var dy = mousePos.y - drag.y;
 
-				var pos = hexContainer.position;
-
+				//var pos = hexContainer.position;
+				/*
 				hexContainer.position.x = pos.x - dx;
 				hexContainer.position.y = pos.y - dy;
+				/**/
+				hexContainer.position.x += dx;
+				hexContainer.position.y += dy;
+				
+				totalOffset.x += dx;
+				totalOffset.y += dy;
+				
+				drag = mousePos;
 			}
 		}
 

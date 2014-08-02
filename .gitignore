@@ -5,3 +5,4 @@ node_perfctr_provider.man
 npm
 npm.cmd
 node_modules/
+web/npm-debug.log
